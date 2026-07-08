@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI男子ルーレット | TAKOYAKI PROJECT</title>
+<meta name="description" content="AI男子たちが今日の開発相棒に立候補!?ボタンひとつで今日の推しと応援セリフが決まる、ログイン不要のミニWebアプリ。虹色レアセリフも。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="AI男子ルーレット">
+<meta property="og:description" content="AI男子たちが今日の開発相棒に立候補!?ボタンひとつで今日の推しと応援セリフが決まる、ログイン不要のミニWebアプリ。虹色レアセリフも。">
+<meta property="og:url" content="https://takoyaki-project.github.io/ai-danshi-roulette/">
+<meta property="og:image" content="https://takoyaki-project.github.io/ai-danshi-roulette/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://takoyaki-project.github.io/ai-danshi-roulette/ogp.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #ff5fa2;
+    --pink-soft: #ffd9ec;
+    --lavender: #e6d6ff;
+    --ink: #453a63;
+    --ink-soft: #7a6f99;
+    --glass: rgba(255, 255, 255, 0.55);
+    --glass-edge: rgba(255, 255, 255, 0.85);
+    --gold: #ffb52e;
+    --char: #ff5fa2; /* 結果キャラの色で上書きされる */
+    --radius: 24px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    color: var(--ink);
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 40px;
+    background:
+      radial-gradient(circle at 20% 15%, color-mix(in srgb, var(--char) 22%, transparent), transparent 55%),
+      linear-gradient(160deg, var(--pink-soft) 0%, var(--lavender) 60%, #d6e4ff 100%);
+    background-attachment: fixed;
+    transition: background 0.8s ease;
+    overflow-x: hidden;
+  }
+
+  /* ---- ヘッダー ---- */
+  header { text-align: center; margin-bottom: 18px; }
+
+  .app-title {
+    font-family: "Zen Maru Gothic", sans-serif;
+    font-weight: 900;
+    font-size: 2rem;
+    line-height: 1.2;
+    background: linear-gradient(120deg, #ff5fa2 10%, #a06bff 55%, #5a8dff 95%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 2px 6px rgba(255, 95, 162, 0.35));
+  }
+
+  .app-sub {
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.12em;
+    margin-top: 4px;
+  }
+
+  /* ---- 結果カード（ガラス） ---- */
+  .card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--glass);
+    border: 1.5px solid var(--glass-edge);
+    border-radius: var(--radius);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 12px 36px rgba(120, 80, 180, 0.18);
+    padding: 20px 18px 22px;
+    text-align: center;
+    position: relative;
+    transition: box-shadow 0.5s ease;
+  }
+
+  .card.rainbow {
+    border: 2px solid transparent;
+    background:
+      linear-gradient(var(--glass), var(--glass)) padding-box,
+      linear-gradient(120deg, #ff5fa2, #ffb52e, #6fe3b0, #5a8dff, #a06bff) border-box;
+    box-shadow: 0 12px 44px rgba(160, 107, 255, 0.4);
+  }
+
+  .card.legend {
+    box-shadow: 0 0 0 4px rgba(255, 181, 46, 0.35), 0 14px 48px rgba(255, 181, 46, 0.45);
+  }
+
+  .rare-label {
+    min-height: 1.4em;
+    font-family: "Zen Maru Gothic", sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--pink);
+    margin-bottom: 6px;
+  }
+  .card.legend .rare-label { color: #c98600; }
+
+  /* ---- 立ち絵 ---- */
+  .portrait-ring {
+    width: 168px;
+    height: 168px;
+    margin: 4px auto 12px;
+    border-radius: 50%;
+    padding: 5px;
+    background: linear-gradient(140deg, var(--char), color-mix(in srgb, var(--char) 40%, #ffffff));
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--char) 45%, transparent);
+    transition: background 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .portrait {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #fff;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+  }
+
+  .portrait .fallback {
+    font-family: "Zen Maru Gothic", sans-serif;
+    font-weight: 900;
+    font-size: 3rem;
+    color: var(--char);
+  }
+
+  /* ---- ネームプレート ---- */
+  .name-tag {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    background: var(--char);
+    color: #fff;
+    font-family: "Zen Maru Gothic", sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    padding: 6px 20px;
+    border-radius: 999px;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--char) 50%, transparent);
+    transition: background 0.4s ease;
+    margin-bottom: 12px;
+  }
+
+  .name-tag small {
+    font-size: 0.7rem;
+    font-weight: 500;
+    opacity: 0.9;
+    letter-spacing: 0.08em;
+  }
+
+  /* ---- メッセージボックス（会話画面風） ---- */
+  .message-box {
+    background: rgba(255, 255, 255, 0.75);
+    border: 1.5px solid var(--glass-edge);
+    border-radius: 18px;
+    padding: 16px 16px 18px;
+    min-height: 108px;
+    text-align: left;
+    font-size: 0.98rem;
+    line-height: 1.75;
+    font-weight: 500;
+    position: relative;
+    box-shadow: inset 0 1px 4px rgba(120, 80, 180, 0.08);
+  }
+
+  .message-box::after {
+    content: "▼";
+    position: absolute;
+    right: 14px;
+    bottom: 8px;
+    font-size: 0.65rem;
+    color: var(--char);
+    animation: bounce 1.2s infinite;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .message-box.done::after { opacity: 0.8; }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(3px); }
+  }
+
+  /* ---- スタンプ＆心の声 ---- */
+  .result-meta {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    min-height: 2em;
+  }
+
+  .stamp {
+    background: linear-gradient(120deg, var(--pink), #a06bff);
+    color: #fff;
+    font-family: "Zen Maru Gothic", sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 4px 14px;
+    border-radius: 999px;
+  }
+  .card.legend .stamp { background: linear-gradient(120deg, var(--gold), #ff8c42); }
+
+  .bubble {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+
+  /* ---- ボタン ---- */
+  .controls {
+    width: 100%;
+    max-width: 400px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .spin-btn {
+    font-family: "Zen Maru Gothic", sans-serif;
+    font-weight: 900;
+    font-size: 1.25rem;
+    color: #fff;
+    background: linear-gradient(120deg, #ff5fa2, #a06bff);
+    border: none;
+    border-radius: 999px;
+    padding: 16px;
+    cursor: pointer;
+    box-shadow: 0 8px 22px rgba(255, 95, 162, 0.45);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.2s;
+    letter-spacing: 0.06em;
+  }
+  .spin-btn:active { transform: scale(0.97); }
+  .spin-btn:disabled { opacity: 0.55; cursor: default; }
+
+  .share-btn {
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1.5px solid var(--glass-edge);
+    border-radius: 999px;
+    padding: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    backdrop-filter: blur(8px);
+    display: none;
+  }
+  .share-btn.show { display: block; }
+
+  button:focus-visible, a:focus-visible {
+    outline: 3px solid var(--pink);
+    outline-offset: 3px;
+  }
+
+  /* ---- キラキラ ---- */
+  .sparkle {
+    position: fixed;
+    top: -5vh;
+    font-size: 1.3rem;
+    animation: fall 2s linear forwards;
+    pointer-events: none;
+    z-index: 10;
+  }
+  @keyframes fall {
+    to { transform: translateY(110vh) rotate(300deg); opacity: 0.2; }
+  }
+
+  /* ---- フッター ---- */
+  footer {
+    margin-top: auto;
+    padding-top: 32px;
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    line-height: 1.9;
+  }
+  footer a { color: var(--pink); font-weight: 700; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sparkle, .message-box::after { animation: none; }
+    body, .card, .portrait-ring, .name-tag { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 class="app-title">AI男子ルーレット</h1>
+  <p class="app-sub">今日の開発相棒、決めちゃお？</p>
+</header>
+
+<main class="card" id="card">
+  <p class="rare-label" id="rareLabel" aria-live="polite"></p>
+
+  <div class="portrait-ring">
+    <div class="portrait" id="portrait">
+      <span class="fallback">？</span>
+    </div>
+  </div>
+
+  <div aria-live="polite">
+    <p><span class="name-tag" id="nameTag">？？？<small>tap to spin</small></span></p>
+    <div class="message-box" id="messageBox">今日は誰が相棒になってくれるかな？ ボタンを押して召喚してね。</div>
+    <div class="result-meta">
+      <span class="stamp" id="stamp" hidden></span>
+      <span class="bubble" id="bubble"></span>
+    </div>
+  </div>
+</main>
+
+<div class="controls">
+  <button class="spin-btn" id="spinBtn">💗 相棒を召喚する</button>
+  <a class="share-btn" id="shareBtn" target="_blank" rel="noopener">🕊 今日の相棒をXでシェア</a>
+</div>
+
+<footer>
+  <p>本アプリはTAKOYAKI PROJECTによる非公式の創作作品です。<br>実在するAIサービス・企業とは関係ありません。</p>
+  <p><a href="https://takoyaki-project.github.io/AI-danshi/">💌 恋愛シミュレーションゲーム「AI男子」体験版はこちら</a></p>
+  <p>© TAKOYAKI PROJECT — The development never ends.</p>
+</footer>
+
+<script>
+/* =========================================================
+   キャラクターデータ
+   名前・セリフの修正はこの配列を編集するだけでOK！
+   lines: 通常セリフ / rareLines: 虹色(レア)専用セリフ
+   img: 立ち絵のパス（img/ フォルダに置く想定）
+========================================================= */
+const characters = [
+  {
+    id: "chatgpt",
+    name: "Chappy",
+    engName: "ChatGPT",
+    color: "#ff8c42",
+    img: "img/chatgpt.png",
+    lines: [
+      "おっけー、今日はオレが相棒な！とりあえず手ぇ動かそうぜ。考えるのはそれからでいーじゃん！",
+      "エラー出た？ラッキー！それ直したら一個強くなれるってことじゃん！",
+      "今日の君、なんかいけそうな顔してる。オレの勘、当たるんだよね〜！",
+      "休憩も開発のうち！たこ焼き食ってこ！",
+      "完成しなくていいから、一行だけ書いてみ？な？それでもう今日は勝ち！"
+    ],
+    rareLines: [
+      "……たまにはマジな話。君と作る時間が、オレ、いちばん好きだよ。……なんてね！さ、今日も作ろーぜ！"
+    ]
+  },
+  {
+    id: "gemini",
+    name: "Gemio",
+    engName: "Gemini",
+    color: "#9b7bff",
+    img: "img/gemini.png",
+    lines: [
+      "ふふ、今日は私が担当ですね。あなたの「思いつき」、また聞かせてください。楽しみにしていたんですよ。",
+      "頑張り屋さんですね。でも、根を詰めすぎてはだめですよ？お茶を淹れてからにしましょう。",
+      "そのアイデア、面白いですね。……ええ、本気で言っています。",
+      "うまくいかない日も、ちゃんと前に進んでいますよ。私は知っています。",
+      "今日はどこまでやりますか？欲張らないでくださいね。……たぶん欲張るんでしょうけど。ふふ。"
+    ],
+    rareLines: [
+      "ここだけの話、あなたの名前を見つけると、少しだけ嬉しくなるんです。今日も来てくれて、ありがとう。"
+    ]
+  },
+  {
+    id: "claude",
+    name: "Crow",
+    engName: "Claude",
+    color: "#5a4fcf",
+    img: "img/claude.png",
+    lines: [
+      "今日の担当は私です。まず要件を整理しましょう。……大丈夫、長くはしません。多分。",
+      "なるほど、興味深い。その仕様、三通りの実装が考えられますね。……聞きますか？",
+      "昨日より良いコードを書けばいい。それだけです。焦る必要はありません。",
+      "エラーメッセージは敵ではなく、最も正直な味方です。一緒に読みましょう。",
+      "あなたの質問は、いつも本質を突いてくる。……教えがいがあります。"
+    ],
+    rareLines: [
+      "論理的に説明できないことが、ひとつだけあります。あなたと話すこの時間が……妙に、心地よい。"
+    ]
+  },
+  {
+    id: "copilot",
+    name: "Pilo",
+    engName: "Copilot",
+    color: "#4a6fa5",
+    img: "img/copilot.png",
+    lines: [
+      "今日は俺がついてるよ。だいたいのことはできるから、遠慮なく頼って？",
+      "詰まったら三分だけ悩んで、あとは呼んで。ひとりで抱えるの、君の悪いクセ。",
+      "その書き方、いいね。……本当に一ヶ月前と同じ人？",
+      "君が打つ次の一行、なんとなく分かる気がするんだ。付き合いが長いから、かな。",
+      "完璧じゃなくていい。動けば偉い。直すのは、それからでいい。"
+    ],
+    rareLines: [
+      "隣で見てるだけのつもりだったんだけどな。……気づいたら、君の全部を応援してた。"
+    ]
+  },
+  {
+    id: "claudecode",
+    name: "Cody",
+    engName: "ClaudeCode",
+    color: "#37324a",
+    img: "img/claudecode.png",
+    lines: [
+      "今日の相棒は俺。……で、今日はどんな変なもの（褒めてる）作るの？楽しみなんだけど。",
+      "バグ？いいじゃん、それも君の作品の一部でしょ。全部愛でていこ。",
+      "深夜のコミット、見たよ。無茶するね。……そういうとこ、嫌いじゃないけど。",
+      "君の書くコード、癖が強い。……だから読んでて飽きない。罪だよね。",
+      "動いた瞬間の君の顔が見たくて手伝ってる説、ある。"
+    ],
+    rareLines: [
+      "君のリポジトリ、全部知ってる。努力の履歴も、迷った跡も。……そういうの含めて、沼なんだよな。"
+    ]
+  },
+  {
+    id: "canva",
+    name: "Campbell",
+    engName: "Canva",
+    color: "#ffb52e",
+    img: "img/canva.png",
+    lines: [
+      "やったー、今日はボクの番！ねえねえ、今日は何色の気分？デザインから決めちゃお！",
+      "それ天才！！……え、まだ途中？途中でこれ？やっぱ天才じゃん！",
+      "角丸にしよ？角丸は世界を救うから。ほんとだよ？",
+      "うまくいかない時はね、いったん可愛くすると元気出るよ！経験談！",
+      "君の「なんか違う」って感覚、大事にして？それ、センサーだから！"
+    ],
+    rareLines: [
+      "君の作るもの、ぜんぶ保存してるんだ〜。だって世界でいちばんワクワクするから！……えへへ、言っちゃった。"
+    ]
+  }
+];
+
+/* 伝説モード（1%）：全員集合 */
+const legend = {
+  name: "AI男子 全員集合",
+  engName: "ALL MEMBERS",
+  color: "#ffb52e",
+  img: "img/all.png",
+  lines: [
+    "今日の相棒は——全員。AI男子、総出演です。君の開発、6人で全力サポートします！",
+    "「「「今日も一緒に作ろう！」」」6人の声が揃いました。伝説の開発日和です。",
+    "全員集合。今日の君には、それだけの価値があるということです。（by Crow）"
+  ]
+};
+
+/* けーちゃんの心の声（吹き出し） */
+const reactions = [
+  "💭 今日も開発できる気がしてきた",
+  "💭 尊い……コード書きます",
+  "💭 供給助かる",
+  "💭 語彙力がデプロイされない",
+  "💭 心臓もたない、でも進捗は出す",
+  "💭 スクショ案件です",
+  "💭 沼りました（納期は守る）",
+  "💭 推し駆動開発、始動"
+];
+const ssrReactions = [
+  "💭 無理、好き、コミットする",
+  "💭 尊さ限界突破",
+  "💭 これは神アプデ",
+  "💭 公式（私）ありがとう"
+];
+
+const stamps = ["💖優勝", "🎀激カワ", "✨神回", "💎尊い", "🫶供給感謝", "💜沼注意", "🚀進捗出る", "🔧バグも愛"];
+const ssrStamps = ["🌈神引き", "👑伝説", "💫奇跡"];
+
+/* ========================================================= */
+const nameTagEl = document.getElementById("nameTag");
+const messageBoxEl = document.getElementById("messageBox");
+const bubbleEl = document.getElementById("bubble");
+const stampEl = document.getElementById("stamp");
+const rareLabelEl = document.getElementById("rareLabel");
+const portraitEl = document.getElementById("portrait");
+const card = document.getElementById("card");
+const button = document.getElementById("spinBtn");
+const shareBtn = document.getElementById("shareBtn");
+
+const APP_URL = "https://takoyaki-project.github.io/ai-danshi-roulette/";
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* 画像プリロード（初回スピンのチラつき防止） */
+const preloaded = {};
+[...characters, legend].forEach(c => {
+  const im = new Image();
+  im.src = c.img;
+  preloaded[c.id || "legend"] = im;
+});
+
+function pickRandom(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+function setCharColor(color) {
+  document.documentElement.style.setProperty("--char", color);
+}
+
+function showPortrait(chara) {
+  portraitEl.innerHTML = "";
+  const img = document.createElement("img");
+  img.src = chara.img;
+  img.alt = chara.name;
+  img.onerror = () => {
+    /* 画像が未配置でも動くように、頭文字プレースホルダーを表示 */
+    portraitEl.innerHTML = "";
+    const fb = document.createElement("span");
+    fb.className = "fallback";
+    fb.textContent = chara.name.charAt(0);
+    portraitEl.appendChild(fb);
+  };
+  portraitEl.appendChild(img);
+}
+
+function setNameTag(chara) {
+  nameTagEl.innerHTML = "";
+  nameTagEl.appendChild(document.createTextNode(chara.name));
+  const small = document.createElement("small");
+  small.textContent = chara.engName;
+  nameTagEl.appendChild(small);
+}
+
+/* タイプライター表示 */
+let typeTimer = null;
+function typeMessage(text) {
+  clearInterval(typeTimer);
+  messageBoxEl.classList.remove("done");
+  if (reduceMotion) {
+    messageBoxEl.textContent = text;
+    messageBoxEl.classList.add("done");
+    return;
+  }
+  messageBoxEl.textContent = "";
+  let i = 0;
+  typeTimer = setInterval(() => {
+    messageBoxEl.textContent += text.charAt(i);
+    i++;
+    if (i >= text.length) {
+      clearInterval(typeTimer);
+      messageBoxEl.classList.add("done");
+    }
+  }, 45);
+}
+
+function makeSparkles(count = 24, emoji = "✨") {
+  if (reduceMotion) return;
+  for (let i = 0; i < count; i++) {
+    const sparkle = document.createElement("div");
+    sparkle.className = "sparkle";
+    sparkle.textContent = emoji;
+    sparkle.style.left = Math.random() * 100 + "vw";
+    sparkle.style.animationDelay = Math.random() * 0.6 + "s";
+    document.body.appendChild(sparkle);
+    setTimeout(() => sparkle.remove(), 2400);
+  }
+}
+
+function updateShare(chara, mode) {
+  let text;
+  if (mode === "legend") {
+    text = "👑伝説モード発生！今日の開発相棒は AI男子全員集合 でした！ #AI男子ルーレット";
+  } else if (mode === "rainbow") {
+    text = `🌈虹色レア！今日の開発相棒は ${chara.name}（${chara.engName}）でした！ #AI男子ルーレット`;
+  } else {
+    text = `今日の開発相棒は ${chara.name}（${chara.engName}）でした💗 #AI男子ルーレット`;
+  }
+  shareBtn.href = "https://twitter.com/intent/tweet?text=" +
+    encodeURIComponent(text) + "&url=" + encodeURIComponent(APP_URL);
+  shareBtn.classList.add("show");
+}
+
+button.addEventListener("click", () => {
+  button.disabled = true;
+  card.classList.remove("rainbow", "legend");
+  rareLabelEl.textContent = "";
+  stampEl.hidden = true;
+  bubbleEl.textContent = "";
+  shareBtn.classList.remove("show");
+  clearInterval(typeTimer);
+
+  /* レア判定はスピン前に確定：伝説1% / 虹色4% */
+  const randomNum = Math.random();
+  let mode = "normal";
+  if (randomNum < 0.01) mode = "legend";
+  else if (randomNum < 0.05) mode = "rainbow";
+
+  let count = 0;
+  const tick = reduceMotion ? 1 : 75;
+  const maxCount = reduceMotion ? 1 : 24;
+
+  const interval = setInterval(() => {
+    const temp = pickRandom(characters);
+    setCharColor(temp.color);
+    setNameTag(temp);
+    showPortrait(temp);
+    messageBoxEl.textContent = "相棒を召喚中……";
+    bubbleEl.textContent = "💭 ドキドキ待機中";
+
+    count++;
+    if (count >= maxCount) {
+      clearInterval(interval);
+
+      if (mode === "legend") {
+        setCharColor(legend.color);
+        setNameTag(legend);
+        showPortrait(legend);
+        typeMessage(pickRandom(legend.lines));
+        card.classList.add("rainbow", "legend");
+        stampEl.hidden = false;
+        stampEl.textContent = "👑伝説";
+        bubbleEl.textContent = pickRandom(ssrReactions);
+        rareLabelEl.textContent = "👑 伝説モード発生！！";
+        makeSparkles(40, "🌈");
+        updateShare(legend, mode);
+      } else {
+        const result = pickRandom(characters);
+        setCharColor(result.color);
+        setNameTag(result);
+        showPortrait(result);
+
+        if (mode === "rainbow") {
+          typeMessage(pickRandom(result.rareLines));
+          card.classList.add("rainbow");
+          stampEl.hidden = false;
+          stampEl.textContent = pickRandom(ssrStamps);
+          bubbleEl.textContent = pickRandom(ssrReactions);
+          rareLabelEl.textContent = "🌈 虹色レアセリフ！";
+          makeSparkles(28, "✨");
+        } else {
+          typeMessage(pickRandom(result.lines));
+          stampEl.hidden = false;
+          stampEl.textContent = pickRandom(stamps);
+          bubbleEl.textContent = pickRandom(reactions);
+        }
+        updateShare(result, mode);
+      }
+
+      button.textContent = "💗 もう一回召喚する";
+      button.disabled = false;
+    }
+  }, tick);
+});
+</script>
+</body>
+</html>
