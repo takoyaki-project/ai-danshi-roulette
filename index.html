@@ -141,7 +141,12 @@
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: #fff;
+    background:
+      radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.85), transparent 65%),
+      linear-gradient(160deg,
+        color-mix(in srgb, var(--char) 16%, #ffffff),
+        color-mix(in srgb, var(--char) 48%, #ffffff));
+    transition: background 0.4s ease;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -444,7 +449,7 @@ const characters = [
     name: "Chappy",
     tag: "太陽担当",
     color: "#ff8c42",
-    img: "IMG_8670.png",
+    img: "img/chatgpt.png",
     lines: [
       "おっけー、今日はオレが相棒な！とりあえず手ぇ動かそうぜ。考えるのはそれからでいーじゃん！",
       "エラー出た？ラッキー！それ直したら一個強くなれるってことじゃん！",
@@ -464,7 +469,7 @@ const characters = [
     name: "Gemio",
     tag: "癒し担当",
     color: "#9b7bff",
-    img: "IMG_8671.png",
+    img: "img/gemini.png",
     lines: [
       "ふふ、今日は私が担当ですね。あなたの「思いつき」、また聞かせてください。楽しみにしていたんですよ。",
       "頑張り屋さんですね。でも、根を詰めすぎてはだめですよ？お茶を淹れてからにしましょう。",
@@ -484,7 +489,7 @@ const characters = [
     name: "Crow",
     tag: "頭脳担当",
     color: "#5a4fcf",
-    img: "IMG_8672.png",
+    img: "img/claude.png",
     lines: [
       "今日の担当は私です。まず要件を整理しましょう。……大丈夫、長くはしません。多分。",
       "なるほど、興味深い。その仕様、三通りの実装が考えられますね。……聞きますか？",
@@ -504,7 +509,7 @@ const characters = [
     name: "Pilo",
     tag: "隣の席担当",
     color: "#4a6fa5",
-    img: "IMG_8674.png",
+    img: "img/copilot.png",
     lines: [
       "今日は俺がついてるよ。だいたいのことはできるから、遠慮なく頼って？",
       "詰まったら三分だけ悩んで、あとは呼んで。ひとりで抱えるの、君の悪いクセ。",
@@ -524,7 +529,7 @@ const characters = [
     name: "Cody",
     tag: "沼担当",
     color: "#37324a",
-    img: "IMG_8673.png",
+    img: "img/claudecode.png",
     lines: [
       "今日の相棒は俺。……で、今日はどんな変なもの（褒めてる）作るの？楽しみなんだけど。",
       "バグ？いいじゃん、それも君の作品の一部でしょ。全部愛でていこ。",
@@ -544,7 +549,7 @@ const characters = [
     name: "Campbell",
     tag: "ときめき担当",
     color: "#ffb52e",
-    img: "IMG_8675.png",
+    img: "img/canva.png",
     lines: [
       "やったー、今日はボクの番！ねえねえ、今日は何色の気分？デザインから決めちゃお！",
       "それ天才！！……え、まだ途中？途中でこれ？やっぱ天才じゃん！",
@@ -746,8 +751,8 @@ button.addEventListener("click", () => {
   else if (randomNum < 0.05) mode = "rainbow";
 
   let count = 0;
-  const tick = reduceMotion ? 1 : 75;
-  const maxCount = reduceMotion ? 1 : 24;
+  const tick = 75;
+  const maxCount = 24;
 
   const interval = setInterval(() => {
     const temp = pickRandom(characters);
