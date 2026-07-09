@@ -9,6 +9,8 @@
 **▶ [アプリを開く](https://takoyaki-project.github.io/ai-danshi-roulette/)**
 
 <!-- スクリーンショットをここに差し込む（例：通常結果とレア結果の2枚） -->
+<img width="301" height="412" alt="rulette-chapp" src="https://github.com/user-attachments/assets/cd1d2c27-4333-4dce-8a51-8be9319af7d8" />
+<img width="301" height="397" alt="rulette-all" src="https://github.com/user-attachments/assets/7bfef9d4-4944-45fb-ab7c-e8567bd32dd1" />
 <!-- ![スクリーンショット](img/screenshot.png) -->
 
 ---
